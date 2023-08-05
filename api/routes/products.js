@@ -7,13 +7,29 @@ const mongoose = require("mongoose");
 // Get all the Products
 router.get("/", (req, res, next) => {
   Product.find() // Method to Find all the Products
+    .select("name price _id") // Controlling the params we want to show
     .exec() // Query Builder Method to Execute the Query and Return a Promise
     .then((docs) => {
-      console.log(docs);
-      res.status(200).json(docs); //Sending the Found Data
+      // Sending a More Meaningful Response
+      const response = {
+        count: docs.length,
+        products: docs.map((doc) => {
+          return {
+            name: doc.name,
+            price: doc.price,
+            _id: doc._id,
+            request: {
+              type: "GET",
+              description: "FIND MORE DETAIL OF THIS PRODUCT",
+              url: "http://localhost:3000/products/" + doc._id,
+            },
+          };
+        }),
+      };
+      res.status(200).json(response); //Sending the Found Data
     })
     .catch((err) => {
-      console.log(error);
+      console.log(err);
       res.status(500).json({
         error: err, //Showing the Error
       });
@@ -31,11 +47,19 @@ router.post("/", (req, res, next) => {
   product
     .save() //Saves the Data in Database and returns a Promise
     .then((result) => {
-      console.log(result);
       // Showing the message on Completion of Product Creation
       res.status(201).json({
-        message: "Handling POST requests to /products",
-        createdProduct: product,
+        message: "Created Product Successfully",
+        createdProduct: {
+          name: result.name,
+          price: result.price,
+          _id: result._id,
+          request: {
+            type: "GET",
+            description: "FIND MORE DETAIL OF THIS PRODUCT",
+            url: "http://localhost:3000/products/" + result._id,
+          },
+        },
       });
     })
     //Handling the other error
@@ -52,12 +76,21 @@ router.post("/", (req, res, next) => {
 router.get("/:productId", (req, res, next) => {
   const id = req.params.productId;
   Product.findById(id) //Finds a product using the given Id arguement
+    .select("name price _id")
     .exec()
     .then((doc) => {
-      console.log(doc);
       //   Showing product if found, otherwise throwing an error message
       if (doc) {
-        res.status(200).json(doc);
+        res.status(200).json({
+          name: doc.name,
+          price: doc.price,
+          _id: doc._id,
+          request: {
+            type: "GET",
+            description: "FIND ALL PRODUCTS",
+            url: "http://localhost:3000/products/",
+          },
+        });
       } else {
         res.status(404).json({
           message: "No valid Entry Found for provided entry",
@@ -72,7 +105,6 @@ router.get("/:productId", (req, res, next) => {
       });
     });
 });
-
 
 // Updating Values of a Specific Product
 router.patch("/:productId", (req, res, next) => {
@@ -93,8 +125,12 @@ router.patch("/:productId", (req, res, next) => {
     .exec()
     .then((result) => {
       res.status(200).json({
-        message: "Updated Successfully",
-        updatedProduct: result,
+        message: "Product Updated Successfully",
+        request: {
+          type: "GET",
+          description: "FIND MORE DETAIL OF THIS PRODUCT",
+          url: "http://localhost:3000/products/" + result._id,
+        },
       });
     })
     .catch((err) => {
@@ -113,8 +149,16 @@ router.delete("/:productId", (req, res, next) => {
     .exec()
     .then((result) => {
       res.status(200).json({
-        message: "Deleted Successfully",
-        deletedProduct: result,
+        message: "Product Deleted Successfully",
+        request: {
+            type: 'POST',
+            description : 'CREATE A NEW PRODUCT',
+            url: 'http://localhost:3000/products/',
+            body: {
+                name: "String",
+                price: "Number"
+            }
+        }
       });
     })
     .catch((err) => {
