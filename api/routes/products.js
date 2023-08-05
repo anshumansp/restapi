@@ -73,13 +73,21 @@ router.get("/:productId", (req, res, next) => {
     });
 });
 
+
 // Updating Values of a Specific Product
 router.patch("/:productId", (req, res, next) => {
   const id = req.params.productId;
   // Getting new Key/Value to Update
   const updateOps = {};
   for (const ops of req.body) {
-    updateOps[ops.propName] = ops.value;
+    // Only allowing to update the values of the product
+    if (ops.propName === "name") {
+      updateOps["name"] = ops.value;
+    } else if (ops.propName === "price") {
+      updateOps["price"] = ops.value;
+    } else {
+      throw new Error("Properties not defined properly");
+    }
   }
   Product.findByIdAndUpdate({ _id: id }, { $set: updateOps }) //Finding and Updating the Product Details
     .exec()
