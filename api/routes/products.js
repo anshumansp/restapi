@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/product"); //Importing Product Schema
 const mongoose = require("mongoose");
+const multer = require('multer'); //Parses Form Data including images
+const upload = multer({dest: 'uploads'}); // Saves Data to Uploads Folder
 
 // Get all the Products
 router.get("/", (req, res, next) => {
@@ -37,7 +39,8 @@ router.get("/", (req, res, next) => {
 });
 
 // Creating a new Product
-router.post("/", (req, res, next) => {
+router.post("/", upload.single('productImage'), (req, res, next) => {
+  console.log(req.file)
   // Filling the details of new product to save
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
