@@ -4,12 +4,39 @@ const router = express.Router();
 const Product = require("../models/product"); //Importing Product Schema
 const mongoose = require("mongoose");
 const multer = require('multer'); //Parses Form Data including images
-const upload = multer({dest: 'uploads'}); // Saves Data to Uploads Folder
+
+// Adding Storage and Filename to Multer for Storing Images
+const storage = multer.diskStorage({
+  destination: function(req, file, callback){
+    callback(null, './uploads/')
+  },
+  filename: function(req, file, callback){
+    const timestamp = new Date().toISOString().replace(/:/g, '-')
+    callback(null, timestamp + file.originalname);
+  }
+});
+
+// Putting Limits on File Acceptance
+const limits = {
+  fileSize: 1024*1024*5
+}
+
+// Filtering file types 
+const fileFilter = (req, file, cb)=> {
+  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true);
+  } else {
+    cb(new Error('Image Type Not Supported'), false)
+  }
+}
+
+// Multer middleware for handling file uploads with specific options
+const upload = multer({storage: storage, limits: limits, fileFilter: fileFilter});
 
 // Get all the Products
 router.get("/", (req, res, next) => {
   Product.find() // Method to Find all the Products
-    .select("name price _id") // Controlling the params we want to show
+    .select("name price _id productImage") // Controlling the params we want to show
     .exec() // Query Builder Method to Execute the Query and Return a Promise
     .then((docs) => {
       // Sending a More Meaningful Response
@@ -20,6 +47,7 @@ router.get("/", (req, res, next) => {
             name: doc.name,
             price: doc.price,
             _id: doc._id,
+            productImage: doc.productImage,
             request: {
               type: "GET",
               description: "FIND MORE DETAIL OF THIS PRODUCT",
@@ -46,6 +74,7 @@ router.post("/", upload.single('productImage'), (req, res, next) => {
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
     price: req.body.price,
+    productImage: req.file.path
   });
   product
     .save() //Saves the Data in Database and returns a Promise
@@ -57,6 +86,7 @@ router.post("/", upload.single('productImage'), (req, res, next) => {
           name: result.name,
           price: result.price,
           _id: result._id,
+          productImage: result.productImage,
           request: {
             type: "GET",
             description: "FIND MORE DETAIL OF THIS PRODUCT",
@@ -88,6 +118,7 @@ router.get("/:productId", (req, res, next) => {
           name: doc.name,
           price: doc.price,
           _id: doc._id,
+          productImage: doc.productImage,
           request: {
             type: "GET",
             description: "FIND ALL PRODUCTS",

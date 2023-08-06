@@ -22,6 +22,7 @@ mongoose.connect(mongoURI, {
 });
 
 // Applying required middlewares
+app.use('/uploads', express.static('uploads')); // Static File Serving and Making it accessible globally.
 app.use(morgan("dev")); // Log requests in dev format
 app.use(bodyParser.urlencoded({ extended: false })); // Parse URL-encoded data
 app.use(bodyParser.json()); // Parse JSON data
