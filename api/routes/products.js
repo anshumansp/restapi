@@ -1,9 +1,10 @@
 // Importing required Modules
 const express = require("express");
 const router = express.Router();
-const Product = require("../models/product"); //Importing Product Schema
 const mongoose = require("mongoose");
 const multer = require('multer'); //Parses Form Data including images
+const Product = require("../models/product"); //Importing Product Schema
+const checkAuth = require("../middleware/check-auth"); //Importing Authentication Check Middleware
 
 // Adding Storage and Filename to Multer for Storing Images
 const storage = multer.diskStorage({
@@ -67,7 +68,7 @@ router.get("/", (req, res, next) => {
 });
 
 // Creating a new Product
-router.post("/", upload.single('productImage'), (req, res, next) => {
+router.post("/", checkAuth, upload.single('productImage'), (req, res, next) => {
   console.log(req.file)
   // Filling the details of new product to save
   const product = new Product({
@@ -141,7 +142,7 @@ router.get("/:productId", (req, res, next) => {
 });
 
 // Updating Values of a Specific Product
-router.patch("/:productId", (req, res, next) => {
+router.patch("/:productId", checkAuth, (req, res, next) => {
   const id = req.params.productId;
   // Getting new Key/Value to Update
   const updateOps = {};
@@ -177,7 +178,7 @@ router.patch("/:productId", (req, res, next) => {
 });
 
 // Deleting the Specific Product
-router.delete("/:productId", (req, res, next) => {
+router.delete("/:productId", checkAuth, (req, res, next) => {
   const id = req.params.productId;
   Product.findByIdAndRemove({ _id: id })
     .exec()
