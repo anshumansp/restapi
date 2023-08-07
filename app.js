@@ -10,6 +10,7 @@ const mongoose = require("mongoose"); // ODM for MongoDB and Node JS
 // Importing files to handle the requests
 const productsRoute = require("./api/routes/products");
 const ordersRoute = require("./api/routes/orders");
+const usersRoute = require("./api/routes/users");
 
 // Connecting to MongoDB Cloud(Atlas)
 const mongoURI =
@@ -44,6 +45,7 @@ app.use((req, res, next) => {
 // Forwarding the requests to specific routes
 app.use("/products", productsRoute);
 app.use("/orders", ordersRoute);
+app.use("/users", usersRoute);
 
 // Handling 'Not-Found' Errors
 app.use((req, res, next) => {
