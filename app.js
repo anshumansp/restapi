@@ -4,7 +4,7 @@ const app = express();
 
 // Importing the required modules
 const morgan = require("morgan"); // Logs all the data into console
-const bodyParser = require("body-parser"); //Middleware for Parsing the data into usable formats --- JSON, URLEncoded, etc.
+const bodyParser = require("body-parser"); //Middleware for Parsing the data into usable formats
 const mongoose = require("mongoose"); // ODM for MongoDB and Node JS
 
 // Importing files to handle the requests
